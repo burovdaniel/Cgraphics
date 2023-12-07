@@ -3,22 +3,28 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
+//ENDGOAL: uploading an ascii figure and rotating it
 
-//GOAL: hallow disc that rotates around the screen
-//			then upload to github and mini  oled display
+//GOAL: adding depth to the disc
 
-#define SCREEN_WIDTH  143
-#define SCREEN_HEIGHT	40
+//different approach: draw the circle in 3d space, then project it onto the screen
+//x^2 + y^2 = r^2
+//How about draw the circle in buffer, then rotate the buffer, then print the buffer
+
+#define SCREEN_WIDTH  110
+#define SCREEN_HEIGHT	31
 
 #define pi 3.14
 
 const float radius = 10;
-const float thickness = 3;
+const float thickness = 4;
+
+const float K2 = 5; //constant for zoom
+const float K1 = SCREEN_WIDTH*K2*3/(18); //constant for zoom
 
 char  buffer[SCREEN_WIDTH*SCREEN_HEIGHT]; //screen buffer
 float Zbuffer[SCREEN_WIDTH*SCREEN_HEIGHT]; //depth buffer stores z values
 
-float x=0;
 float A=0; //angle to rotate
 
 int main(void)
@@ -36,17 +42,27 @@ int main(void)
 		float sinA = sin(A), cosA = cos(A);
 
 		//draw circle
-		//sweep angle
-		for(float theta=0; theta < 2*pi; theta+=0.01)
+		//sweep thickness
+		for(float t=1; t<=thickness; t++)
 		{
-			float circleX = radius*sin(theta);
-			float circleY = radius*cos(theta);
+			//sweep angle
+			for(float theta=0; theta < 2*pi; theta+=0.01)
+			{
+				float circleX = radius*sin(theta)*cosA + t;
+				float circleY = radius*cos(theta);
 
-			int xp = (int)(SCREEN_WIDTH/2  + circleX*cosA);
-			int yp = (int)(SCREEN_HEIGHT/2 - circleY);
+				int xp = (int)(SCREEN_WIDTH/2.0 + circleX);
+				int yp = (int)(SCREEN_HEIGHT/2.0 - circleY);
+
+				//debug
+				//printf("x: %f, y: %f\n", circleX, circleY);
+				//printf("ooz: %f\n", ooz);
+				//printf("x: %d, y: %d\n", xp, yp);
 
 
-			buffer[xp+(yp*SCREEN_WIDTH)] = '.';
+				buffer[xp+(yp*SCREEN_WIDTH)] = ':';
+
+			}
 		}
 
 		//print the circle
