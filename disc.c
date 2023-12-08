@@ -7,8 +7,8 @@
 
 //GOAL: adding shading to the figure
 
-#define SCREEN_WIDTH  130
-#define SCREEN_HEIGHT	35
+#define SCREEN_WIDTH  127
+#define SCREEN_HEIGHT	45
 
 #define pi 3.14
 
