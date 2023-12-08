@@ -5,22 +5,21 @@
 #include <unistd.h>
 //ENDGOAL: uploading an ascii figure and rotating it
 
-//GOAL: adding depth to the disc
+//GOAL: adding shading to the figure
 
-//different approach: draw the circle in 3d space, then project it onto the screen
-//x^2 + y^2 = r^2
-//How about draw the circle in buffer, then rotate the buffer, then print the buffer
-
-#define SCREEN_WIDTH  110
-#define SCREEN_HEIGHT	31
+#define SCREEN_WIDTH  130
+#define SCREEN_HEIGHT	35
 
 #define pi 3.14
 
-const float radius = 10;
+const float radius = 11;
 const float thickness = 4;
 
-const float K2 = 5; //constant for zoom
-const float K1 = SCREEN_WIDTH*K2*3/(18); //constant for zoom
+
+//Still don't understand these
+const float K1 = 55; //distance from eye to screen
+const float K2 = 55;
+
 
 char  buffer[SCREEN_WIDTH*SCREEN_HEIGHT]; //screen buffer
 float Zbuffer[SCREEN_WIDTH*SCREEN_HEIGHT]; //depth buffer stores z values
@@ -46,22 +45,34 @@ int main(void)
 		for(float t=1; t<=thickness; t++)
 		{
 			//sweep angle
-			for(float theta=0; theta < 2*pi; theta+=0.01)
+			for(float theta=0; theta < 2*pi; theta+=0.001)
 			{
 				float circleX = radius*sin(theta)*cosA + t;
 				float circleY = radius*cos(theta);
 
-				int xp = (int)(SCREEN_WIDTH/2.0 + circleX);
-				int yp = (int)(SCREEN_HEIGHT/2.0 - circleY);
+				float z = K2 + t;
+				float ooz = 1/z;
+
+				int xp = (int)(SCREEN_WIDTH/2.0 + circleX*K1*ooz);
+				int yp = (int)(SCREEN_HEIGHT/2.0 - circleY*K1*ooz);
+
+				//Lighting
+			 	float L =  sin(theta); //normal vector * light vector(1,0,1)
+				L = (L+1)/2; //normalize
 
 				//debug
-				//printf("x: %f, y: %f\n", circleX, circleY);
-				//printf("ooz: %f\n", ooz);
-				//printf("x: %d, y: %d\n", xp, yp);
+				//printf("%f\n", L);
 
-
-				buffer[xp+(yp*SCREEN_WIDTH)] = ':';
-
+				if(L>0)
+				{
+					//set the zbuffer
+					if(ooz>Zbuffer[xp+(yp*SCREEN_WIDTH)])
+					{
+						Zbuffer[xp+(yp*SCREEN_WIDTH)] = ooz;
+						//set the buffer
+						buffer[xp+(yp*SCREEN_WIDTH)] = ".,-~:;=!*#$@"[(int) (L*8)];
+					}
+				}
 			}
 		}
 
