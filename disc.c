@@ -17,12 +17,12 @@ const float thickness = 4;
 
 
 //Still don't understand these
-const float K1 = 55; //distance from eye to screen
+const float K1 = 70; //distance from eye to screen
 const float K2 = 55;
 
 
 char  buffer[SCREEN_WIDTH*SCREEN_HEIGHT]; //screen buffer
-float Zbuffer[SCREEN_WIDTH*SCREEN_HEIGHT]; //depth buffer stores z values
+float Zbuffer[SCREEN_WIDTH*SCREEN_HEIGHT]; //depth buffer
 
 float A=0; //angle to rotate
 
@@ -42,33 +42,37 @@ int main(void)
 
 		//draw circle
 		//sweep thickness
-		for(float t=1; t<=thickness; t++)
+		for(int t = 1; t<=thickness; t++)
 		{
 			//sweep angle
-			for(float theta=0; theta < 2*pi; theta+=0.001)
+			for(float theta=0; theta<2*pi; theta+=0.01)
 			{
+				//calculate the circle
 				float circleX = radius*sin(theta)*cosA + t;
 				float circleY = radius*cos(theta);
 
-				float z = K2 + t;
+				//calculate the z
+				float z = K2 ;
 				float ooz = 1/z;
 
+				//calculate the projection
 				int xp = (int)(SCREEN_WIDTH/2.0 + circleX*K1*ooz);
 				int yp = (int)(SCREEN_HEIGHT/2.0 - circleY*K1*ooz);
 
-				//Lighting
-			 	float L =  sin(theta); //normal vector * light vector(1,0,1)
-				L = (L+1)/2; //normalize
+				//calculate the luminance
+				//float L = sin(theta) + sinA;
+				float L = cosA*sin(theta) + sinA*sin(theta);
+				//normalize the luminance
+				L = (L+1)/2;
 
-				//debug
-				//printf("%f\n", L);
-
+				//no point in drawing if it's off the screen
 				if(L>0)
 				{
 					//set the zbuffer
 					if(ooz>Zbuffer[xp+(yp*SCREEN_WIDTH)])
 					{
 						Zbuffer[xp+(yp*SCREEN_WIDTH)] = ooz;
+
 						//set the buffer
 						buffer[xp+(yp*SCREEN_WIDTH)] = ".,-~:;=!*#$@"[(int) (L*8)];
 					}
